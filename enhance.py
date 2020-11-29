@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""                          _              _                           
-  _ __   ___ _   _ _ __ __ _| |   ___ _ __ | |__   __ _ _ __   ___ ___  
- | '_ \ / _ \ | | | '__/ _` | |  / _ \ '_ \| '_ \ / _` | '_ \ / __/ _ \ 
- | | | |  __/ |_| | | | (_| | | |  __/ | | | | | | (_| | | | | (_|  __/ 
- |_| |_|\___|\__,_|_|  \__,_|_|  \___|_| |_|_| |_|\__,_|_| |_|\___\___| 
+"""                          _              _
+  _ __   ___ _   _ _ __ __ _| |   ___ _ __ | |__   __ _ _ __   ___ ___
+ | '_ \ / _ \ | | | '__/ _` | |  / _ \ '_ \| '_ \ / _` | '_ \ / __/ _ \\
+ | | | |  __/ |_| | | | (_| | | |  __/ | | | | | | (_| | | | | (_|  __/
+ |_| |_|\___|\__,_|_|  \__,_|_|  \___|_| |_|_| |_|\__,_|_| |_|\___\___|
 
 """
 #
@@ -30,6 +30,8 @@ import itertools
 import threading
 import collections
 
+from scipymisc import scipymisc
+import matplotlib.pyplot as plt
 
 # Configure all options first so we can later custom-load other libraries (Theano) based on device specified by user.
 parser = argparse.ArgumentParser(description='Generate a new image by applying style onto a content image.',
@@ -377,7 +379,7 @@ class Model(object):
         params = {k: [cast(p) for p in l.get_params()] for (k, l) in self.list_generator_layers()}
         config = {k: getattr(args, k) for k in ['generator_blocks', 'generator_residual', 'generator_filters'] + \
                                                ['generator_upscale', 'generator_downscale']}
-        
+
         pickle.dump((config, params), bz2.open(self.get_filename(absolute=True), 'wb'))
         print('  - Saved model as `{}` after training.'.format(self.get_filename()))
 
@@ -467,7 +469,7 @@ class NeuralEnhancer(object):
         print('{}'.format(ansi.ENDC))
 
     def imsave(self, fn, img):
-        scipy.misc.toimage(np.transpose(img + 0.5, (1, 2, 0)).clip(0.0, 1.0) * 255.0, cmin=0, cmax=255).save(fn)
+        scipymisc.toimage(np.transpose(img + 0.5, (1, 2, 0)).clip(0.0, 1.0) * 255.0, cmin=0, cmax=255).save(fn)
 
     def show_progress(self, orign, scald, repro):
         os.makedirs('valid', exist_ok=True)
@@ -568,7 +570,7 @@ class NeuralEnhancer(object):
             for i in range(3):
                 output[:,:,i] = self.match_histograms(output[:,:,i], original[:,:,i])
 
-        return scipy.misc.toimage(output, cmin=0, cmax=255)
+        return scipymisc.toimage(output, cmin=0, cmax=255)
 
 
 if __name__ == "__main__":
@@ -580,7 +582,7 @@ if __name__ == "__main__":
         enhancer = NeuralEnhancer(loader=False)
         for filename in args.files:
             print(filename, end=' ')
-            img = scipy.ndimage.imread(filename, mode='RGB')
+            img = plt.imread(filename)
             out = enhancer.process(img)
             out.save(os.path.splitext(filename)[0]+'_ne%ix.png' % args.zoom)
             print(flush=True)
